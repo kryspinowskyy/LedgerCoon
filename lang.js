@@ -3,25 +3,18 @@ const LEDGER_STRINGS = {
         ranks: ["Dust Collector", "Alley Runner", "Vault Whisperer", "Liquidity Ghost", "Sovereign Coon"],
         quotes: [
             "\"Cena to to, co płacisz. Wartość to to, co otrzymujesz.\" — W. Buffett",
-            "\"Zbyt wielu ludzi wydaje pieniądze, których nie zarobili...\" — W. Rogers",
-            "\"Nawyk oszczędzania jest sam w sobie edukacją.\" — S. Johnson",
-            "\"Kto kupuje rzeczy, których nie potrzebuje, okrada samego siebie.\""
+            "\"Nawyk oszczędzania jest sam w sobie edukacją.\"",
+            "\"Kto kupuje rzeczy, których nie potrzebuje, okrada samego siebie.\"",
+            "\"Zbyt wielu ludzi wydaje pieniądze, których nie zarobili.\""
         ],
         stashek: {
-            good: "Konto lśni jak umyte winogrono. Nie zepsuj tego.",
-            bad: "Alarm! Płynność wyparowała. Czas na dietę z krakersów."
+            good: "Konto lśni jak umyte winogrono. Tak trzymaj.",
+            bad: "Alarm! Płynność wyparowała. Pora na dietę, Szefie."
         }
     },
     en: {
         ranks: ["Dust Collector", "Alley Runner", "Vault Whisperer", "Liquidity Ghost", "Sovereign Coon"],
-        quotes: [
-            "\"Price is what you pay. Value is what you get.\" — W. Buffett",
-            "\"Too many people spend money they haven't earned...\" — W. Rogers",
-            "\"The habit of saving is itself an education.\" — S. Johnson"
-        ],
-        stashek: {
-            good: "Wallet's fat and juicy. Keep it that way.",
-            bad: "Alert! We're broke. Crackers for dinner, boss."
-        }
+        quotes: ["\"Price is what you pay. Value is what you get.\"", "\"The habit of saving is itself an education.\""],
+        stashek: { good: "Wallet's fat and juicy. Keep it up.", bad: "Alert! We're broke. Crackers for dinner." }
     }
 };
