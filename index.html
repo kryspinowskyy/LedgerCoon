@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LedgerCoon: Shadow Protocol</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121b26">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <script src="lang.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body class="soft-dark" data-user="man">
+
+    <div id="splash-screen" onclick="unlockHaptics()">
+        <div class="splash-content">
+            <img src="img/splash.png" alt="LedgerCoon" class="splash-logo">
+            <h1 class="glitch-text">LedgerCoon</h1>
+            <p id="splash-quote">"Cena to to, co płacisz. Wartość to to, co otrzymujesz."</p>
+            <span class="handle">Created by @kryspinowskyy</span>
+            <p style="font-size: 0.7rem; margin-top: 20px; opacity: 0.6;">Dotknij ekranu, by odblokować Stashka</p>
+        </div>
+    </div>
+
+    <div id="app-container" style="display: none;">
+        <header class="main-header">
+            <div class="user-pill">
+                <div id="user-avatar" class="avatar-circle glass" onclick="handleAvatarClick()">
+                    <img id="avatar-img" src="" style="display:none; width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                </div>
+                <div class="rank-info">
+                    <span id="rank-name">Dust Collector</span>
+                    <div class="xp-bar-mini"><div id="xp-fill"></div></div>
+                </div>
+            </div>
+            <div id="clock-display" class="glass-text">00:00</div>
+        </header>
+
+        <main id="dashboard">
+            <div class="stashek-status">
+                <div class="mascot-box">
+                    <img src="img/icon.png" id="stashek-mood" class="breathing" alt="Stashek">
+                    <div id="weather-effect">☀️</div>
+                </div>
+                <p id="stashek-talk" class="glass-text">"Gotowy na optymalizację, Szefie?"</p>
+            </div>
+
+            <div class="budget-card glass" id="main-budget-card">
+                <p id="label-today">DOSTĘPNE DZIŚ</p>
+                <h2 id="daily-amount" class="rolling-num">0.00</h2>
+                <div class="streak-badge" id="streak-display">🔥 0 dni</div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-icon glass" onclick="openMiniGame()">🎮</button>
+            <button class="add-btn shadow-glow" onclick="openExpenseModal()">+</button>
+            <button class="nav-icon glass" onclick="toggleTheme()">🎨</button>
+        </nav>
+    </div>
+
+    <div id="game-container" class="hidden-view">
+        <canvas id="gameCanvas"></canvas>
+        <div class="game-ui">
+            <div id="game-score">PUNKTY: 0</div>
+            <button onclick="closeMiniGame()" class="btn-sec">ZAMKNIJ</button>
+        </div>
+    </div>
+
+    <div id="expense-modal" class="modal">
+        <div class="modal-content glass">
+            <div class="ghost-forecast">
+                <div class="forecast-box glass">
+                    <small>TERAZ</small>
+                    <span id="ghost-now">0.00</span>
+                </div>
+                <div class="forecast-box impact">
+                    <small>PROGNOZA DNIA</small>
+                    <span id="ghost-future">0.00</span>
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="number" id="exp-val" placeholder="0.00" inputmode="decimal">
+                <input type="text" id="exp-title" placeholder="Na co idzie kasa?">
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeModal()" class="btn-sec">Wróć</button>
+                <button onclick="confirmExpense()" class="btn-pri">Zatwierdź</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stash-layer" class="hidden-view">
+        <div class="stash-content">
+            <h2>SKARBIEC</h2>
+            <div id="vision-box" class="vision-target glass" onclick="triggerPhotoUpload()">
+                <img id="vision-img" src="" style="display:none; width:100%; height:100%; border-radius:20px; object-fit:cover;">
+                <p id="vision-placeholder">DODAJ CEL (WIZJA)</p>
+            </div>
+            
+            <div id="shred-list-container">
+                <p style="font-size: 0.7rem; opacity: 0.5;">NAJNOWSZE WYDATKI (PRZECIĄGNIJ W DÓŁ)</p>
+                <div id="shred-list"></div>
+            </div>
+
+            <div id="shredder-zone" class="glass">
+                <div class="shredder-icon">⚙️</div>
+                <p>NISZCZARKA DŁUGÓW</p>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="file-input" style="display:none" accept="image/*">
+</body>
+</html>
