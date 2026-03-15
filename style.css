@@ -1,9 +1,10 @@
 :root {
     --bg-main: #0b111b;
     --accent: #00d2ff;
-    --card-bg: rgba(21, 32, 51, 0.9);
+    --card-bg: rgba(21, 32, 51, 0.85);
     --text: #f1f5f9;
     --danger: #ff4b5c;
+    --success: #10b981;
 }
 
 [data-theme="light"] {
@@ -13,54 +14,61 @@
     --text: #1e293b;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, sans-serif; background: var(--bg-main); color: var(--text); height: 100vh; overflow: hidden; }
+* { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-main); color: var(--text); height: 100vh; overflow: hidden; }
 
-/* Układ */
-#app-container {
-    display: none; /* JS to włączy */
-    flex-direction: column;
-    height: 100vh;
-}
+/* Znak wodny (Hologram) */
+#watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80vw; max-width: 400px; opacity: 0.03; z-index: 0; pointer-events: none; }
 
-/* Header */
-.main-header { display: flex; justify-content: space-between; align-items: center; padding: 50px 20px 10px; height: 110px; }
-.avatar-wrapper { position: relative; width: 50px; height: 50px; background: #1a253a; border-radius: 50%; }
-.avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
-.glass-clock { font-weight: bold; opacity: 0.8; }
+#app-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; position: relative; z-index: 1; }
 
-/* Dashboard */
-#dashboard { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; gap: 20px; }
-.stashek-box { display: flex; flex-direction: column; align-items: center; }
-#stashek-mood { width: 120px; height: auto; margin-top: 15px; } /* Sztywny rozmiar */
-.speech-bubble { background: var(--card-bg); padding: 15px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; font-size: 0.9rem; }
+/* Nagłówek */
+.main-header { display: flex; justify-content: space-between; align-items: center; padding: 40px 20px 10px; height: 100px; }
+.profile-section { display: flex; align-items: center; gap: 12px; }
+.avatar-wrapper { position: relative; width: 50px; height: 50px; }
+.avatar-circle { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.05); overflow: hidden; margin: 4px; }
+.avatar-circle img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.progress-ring { position: absolute; transform: rotate(-90deg); top: 0; left: 0; }
+.progress-ring__circle { transition: stroke-dashoffset 0.5s; stroke-dasharray: 150.8; stroke-dashoffset: 150.8; }
+#rank-name { font-weight: 900; color: var(--accent); font-size: 0.75rem; text-transform: uppercase; text-shadow: 0 0 5px rgba(0,210,255,0.3); }
+#xp-text { font-size: 0.65rem; opacity: 0.6; display: block; }
+.glass-clock { font-weight: 800; font-size: 1rem; opacity: 0.8; }
 
-/* Karta */
-.budget-card { 
-    width: 90%; max-width: 340px;
-    padding: 30px 20px; text-align: center; 
-    background: var(--card-bg); border-radius: 30px;
-    border: 1px solid rgba(255,255,255,0.1);
-}
-#daily-amount { font-size: 4rem; font-weight: 900; color: var(--accent); letter-spacing: -3px; }
-#streak-display { margin-top: 10px; font-weight: bold; font-size: 0.8rem; }
+/* Środek (Dashboard) - scrollowany w razie potrzeby */
+#dashboard { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 20px; gap: 15px; overflow-y: auto; padding-bottom: 20px; }
+.stashek-box { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 340px; }
+#stashek-mood { width: 110px !important; height: auto; margin-top: 10px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4)); }
+.speech-bubble { background: var(--card-bg); padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; font-size: 0.9rem; backdrop-filter: blur(10px); width: 100%; }
 
-/* Nawigacja */
-.bottom-nav { height: 110px; display: flex; justify-content: space-around; align-items: center; padding-bottom: 30px; }
-.add-btn { width: 70px; height: 70px; background: var(--accent); border-radius: 50%; border: none; font-size: 2.5rem; color: #000; font-weight: 800; box-shadow: 0 10px 25px rgba(0,210,255,0.4); }
-.nav-icon { font-size: 1.5rem; background: transparent; border: none; color: white; }
+/* Karta Budżetu z Wysokim Kontrastem */
+.budget-card { width: 100%; max-width: 340px; padding: 25px 20px; text-align: center; background: var(--card-bg); border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+#daily-amount { font-size: 4rem; font-weight: 900; color: var(--accent); letter-spacing: -2px; text-shadow: 0 4px 15px rgba(0, 210, 255, 0.4); margin: 5px 0; }
+#streak-display { font-weight: bold; font-size: 0.8rem; opacity: 0.8; }
 
-/* Splash */
-#splash-screen {
-    position: fixed; inset: 0; background: var(--bg-main);
-    z-index: 10000; display: flex; flex-direction: column;
-    justify-content: center; align-items: center; transition: opacity 0.6s ease;
-}
-.splash-logo { width: 140px; border-radius: 30px; margin-bottom: 20px; }
+/* Shadow Log (Historia operacji) */
+.shadow-log { width: 100%; max-width: 340px; background: rgba(0,0,0,0.2); border-radius: 15px; padding: 10px; }
+.log-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+.log-item:last-child { border-bottom: none; }
+.log-del-btn { background: none; border: none; color: var(--danger); font-size: 1.2rem; cursor: pointer; padding: 0 5px; }
 
-/* Skarbiec */
-.hidden-view { position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; display: none; flex-direction: column; padding: 40px 20px; overflow-y: auto; color: white; }
-.back-btn { background: transparent; border: none; color: var(--accent); font-size: 1.5rem; text-align: left; }
-.hidden-view h2 { margin: 20px 0; color: var(--accent); }
-input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid var(--accent); background: rgba(0,0,0,0.2); color: #fff; margin: 10px 0; }
-textarea { width: 100%; height: 200px; background: rgba(0,0,0,0.2); border: 1px solid var(--accent); color: white; padding: 15px; border-radius: 15px; outline: none; }
+/* Dolna Nawigacja */
+.bottom-nav { height: 100px; display: flex; justify-content: space-around; align-items: center; padding-bottom: 25px; background: var(--bg-main); position: relative; z-index: 10; border-top: 1px solid rgba(255,255,255,0.05); }
+.add-btn { width: 70px; height: 70px; background: var(--accent); border-radius: 50%; border: none; font-size: 2.5rem; color: #000; font-weight: 900; box-shadow: 0 5px 20px rgba(0,210,255,0.4); transform: translateY(-15px); }
+.nav-icon { font-size: 1.8rem; background: transparent; border: none; color: var(--text); }
+
+/* Splash Screen */
+#splash-screen { position: fixed; inset: 0; background: var(--bg-main); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease; }
+.splash-logo { width: 140px; border-radius: 30px; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.glitch-text { color: var(--accent); font-weight: 900; font-size: 2rem; letter-spacing: -1px; text-shadow: 0 0 10px rgba(0,210,255,0.4); }
+
+/* Modale i Widoki */
+.modal, .hidden-view { position: fixed; inset: 0; background: var(--bg-main); z-index: 10000; display: none; flex-direction: column; padding: 40px 20px; overflow-y: auto; }
+.modal-content { background: var(--card-bg); padding: 25px; border-radius: 25px; width: 100%; max-width: 360px; margin: auto; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); }
+input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(0,210,255,0.3); background: rgba(0,0,0,0.3); color: #fff; margin-bottom: 10px; font-size: 1rem; }
+textarea { width: 100%; height: 150px; background: rgba(0,0,0,0.3); border: 1px solid rgba(0,210,255,0.3); color: white; padding: 15px; border-radius: 12px; font-family: monospace; font-size: 0.9rem; resize: none; }
+.btn-pri { background: var(--accent); color: #000; font-weight: 900; padding: 15px; border-radius: 12px; border: none; width: 100%; margin-top: 10px; }
+.btn-sec { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 12px; border-radius: 12px; width: 100%; margin-top: 10px; font-weight: bold; }
+
+/* Grid Subskrypcji */
+.subs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+.sub-preset { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 15px 10px; border-radius: 12px; color: white; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: bold; }
