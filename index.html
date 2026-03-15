@@ -5,23 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>LedgerCoon Sovereign</title>
     <link rel="stylesheet" href="style.css">
-    <script src="lang.js" defer></script>
-    <script src="script.js" defer></script>
 </head>
 <body data-theme="dark">
 
+    <img src="img/icon.png" id="watermark" alt="">
+
     <div id="splash-screen">
         <img src="img/splash.png" class="splash-logo">
-        <h1 style="color:#00d2ff; font-weight:900;">LedgerCoon</h1>
-        <p id="splash-quote">Wczytywanie...</p>
-        <span style="margin-top:20px; color:#00d2ff; font-weight:bold;">@kryspinowskyy</span>
+        <h1 class="glitch-text">LedgerCoon</h1>
+        <p id="splash-quote" style="padding: 20px; text-align: center; opacity: 0.7; font-style: italic; font-size: 0.9rem;">Protokoły ładowane...</p>
+        <span style="color:var(--accent); font-weight:bold; letter-spacing: 1px; font-size: 0.8rem; margin-top: 20px;">@kryspinowskyy</span>
     </div>
 
-    <div id="app-container">
+    <div id="app-container" style="display:none;">
         <header class="main-header">
-            <div class="profile-section" onclick="alert('Avatar wkrótce.')">
+            <div class="profile-section" onclick="triggerAvatarUpload()">
                 <div class="avatar-wrapper">
-                    <img id="avatar-img" src="">
+                    <svg class="progress-ring" width="50" height="50">
+                        <circle class="progress-ring__circle" stroke="#00d2ff" stroke-width="3" fill="transparent" r="22" cx="25" cy="25"/>
+                    </svg>
+                    <div class="avatar-circle"><img id="avatar-img" src=""></div>
+                </div>
+                <div>
+                    <span id="rank-name">Dust Collector</span>
+                    <span id="xp-text">0 XP</span>
                 </div>
             </div>
             <div id="clock-display" class="glass-clock">00:00</div>
@@ -29,17 +36,18 @@
 
         <main id="dashboard">
             <div class="stashek-box">
-                <div class="speech-bubble">
-                    <p id="stashek-talk">Księgi otwarte. Co psujemy?</p>
-                </div>
+                <div class="speech-bubble"><p id="stashek-talk">Księgi otwarte.</p></div>
                 <img src="img/icon.png" id="stashek-mood">
             </div>
 
             <div class="budget-card">
-                <p style="font-size:0.7rem; opacity:0.6; letter-spacing:1px;">LIMIT DZIENNY</p>
+                <p style="font-size:0.7rem; opacity:0.6; letter-spacing:1.5px;">LIMIT DZIENNY</p>
                 <h2 id="daily-amount">0.00</h2>
                 <div id="streak-display">⏳ Paliwa na: -- dni</div>
             </div>
+
+            <div class="shadow-log" id="recent-expenses-log">
+                </div>
         </main>
 
         <nav class="bottom-nav">
@@ -49,17 +57,71 @@
         </nav>
     </div>
 
-    <div id="stash-layer" class="hidden-view">
-        <button onclick="toggleStash()" class="back-btn">← WRÓĆ</button>
-        <h2>SKARBIEC</h2>
-        <small>USTAWIENIA BAZOWE</small>
-        <input type="number" id="base-income" placeholder="Wypłata netto" onchange="updateBase()">
-        <input type="number" id="base-bills" placeholder="Suma rachunków" onchange="updateBase()">
-        <input type="date" id="base-payday" onchange="updateBase()">
-        
-        <small style="margin-top:20px; display:block;">STRATEGIA</small>
-        <textarea id="shadow-notes" oninput="saveNotes()" placeholder="Twoje plany..."></textarea>
+    <div id="expense-modal" class="modal" style="justify-content: center;">
+        <div class="modal-content">
+            <h3 style="color:var(--accent); margin-bottom:15px; text-align:center;">DODAJ WYDATEK</h3>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <button onclick="document.getElementById('exp-val').value='10'" class="btn-sec" style="margin:0;">+10</button>
+                <button onclick="document.getElementById('exp-val').value='20'" class="btn-sec" style="margin:0;">+20</button>
+                <button onclick="document.getElementById('exp-val').value='50'" class="btn-sec" style="margin:0;">+50</button>
+            </div>
+            <input type="number" id="exp-val" placeholder="0.00 PLN" inputmode="decimal">
+            <input type="text" id="exp-title" placeholder="Tytuł (np. Kawa)">
+            <button onclick="confirmExpense()" class="btn-pri">ZATWIERDŹ</button>
+            <button onclick="closeModal('expense-modal')" class="btn-sec">ANULUJ</button>
+        </div>
     </div>
 
+    <div id="stash-layer" class="hidden-view">
+        <button onclick="toggleStash()" style="background:none; border:none; color:var(--accent); font-size:1.5rem; text-align:left; margin-bottom:20px;">← POWRÓT</button>
+        
+        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
+            <small style="color:var(--accent); font-weight:bold;">BAZA OPERACYJNA</small>
+            <input type="number" id="base-income" placeholder="Wypłata netto (PLN)" onchange="updateBase()" style="margin-top:10px;">
+            <input type="number" id="base-bills" placeholder="Stałe rachunki (PLN)" onchange="updateBase()">
+            <input type="date" id="base-payday" onchange="updateBase()">
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <small style="color:var(--accent); font-weight:bold;">PIJAWKI</small>
+                <button onclick="openSubModal()" style="background:var(--accent); color:#000; border:none; border-radius:8px; padding:5px 10px; font-weight:bold; font-size:0.7rem;">+ DODAJ</button>
+            </div>
+            <div id="subs-container"></div>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; border:1px solid rgba(255,255,255,0.05);">
+            <small style="color:var(--accent); font-weight:bold; display:block; margin-bottom:10px;">TAJNE ZAPISKI</small>
+            <textarea id="shadow-notes" oninput="saveNotes()" placeholder="Strategia, cele..."></textarea>
+        </div>
+    </div>
+
+    <div id="sub-modal" class="modal" style="justify-content: center;">
+        <div class="modal-content">
+            <h3 style="color:var(--accent); margin-bottom:15px; text-align:center;">WYBIERZ PIJAWKĘ</h3>
+            <div class="subs-grid">
+                <button class="sub-preset" onclick="addPresetSub('Netflix', 43)">🔴 Netflix<br><small>43 PLN</small></button>
+                <button class="sub-preset" onclick="addPresetSub('Spotify', 20)">🟢 Spotify<br><small>20 PLN</small></button>
+                <button class="sub-preset" onclick="addPresetSub('YouTube', 26)">▶️ YouTube<br><small>26 PLN</small></button>
+                <button class="sub-preset" onclick="addPresetSub('Siłownia', 100)">💪 Siłownia<br><small>100 PLN</small></button>
+            </div>
+            <button onclick="addCustomSub()" class="btn-pri">WŁASNA PIJAWKA</button>
+            <button onclick="closeModal('sub-modal')" class="btn-sec">ANULUJ</button>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden-view">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <div id="game-score" style="font-weight:900; color:var(--accent); font-size:1.2rem;">WYNIK: 0</div>
+            <button onclick="closeMiniGame()" class="btn-sec" style="width:auto; margin:0; padding:8px 15px;">ZAKOŃCZ</button>
+        </div>
+        <canvas id="gameCanvas" style="background:rgba(0,0,0,0.5); border-radius:20px; border:2px solid var(--accent); display:block; width:100%;"></canvas>
+        <p style="text-align:center; margin-top:15px; font-size:0.8rem; opacity:0.7;">Złap 🪙 i 💵. Unikaj ☕ i 🍔!</p>
+    </div>
+
+    <input type="file" id="avatar-input" style="display:none" accept="image/*">
+    <script src="lang.js" defer></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
+UK
