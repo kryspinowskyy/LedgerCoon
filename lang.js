@@ -1,4 +1,4 @@
-/* --- BAZA TEKSTÓW I OSOBOWOŚCI LEDGERCOON --- */
+/* --- BAZA TEKSTÓW I OSOBOWOŚCI LEDGERCOON V2 --- */
 
 const LEDGER_STRINGS = {
     pl: {
@@ -29,19 +29,24 @@ const LEDGER_STRINGS = {
             panic: "ODŁÓŻ TO! Nie stać nas na takie luksusy!",
             night: "Szefie, 3 rano... Liczysz siano czy owce? Idź spać.",
             vision: "Chcesz na to tylko patrzeć, czy naprawdę to mieć?",
-            shred: "Jeden wróg mniej. Dokumentacja długu zniszczona."
+            shred: "Jeden wróg mniej. Dokumentacja długu zniszczona.",
+            decoy: "Tryb Przynęty aktywny. Oficjalnie jesteśmy spłukani.",
+            pills: "Pijawki znowu ssą Twoje konto. Widzisz te subskrypcje?"
         },
         
-        // Interfejs
+        // Interfejs V2
         ui: {
             today: "DOSTĘPNE DZIŚ",
             stash: "SKARBIEC",
             vision: "WIZJA",
+            notes: "NOTATKI",
+            survival: "Paliwa na",
+            days: "dni",
             ghost_now: "TERAZ",
             ghost_future: "PROGNOZA",
-            days_left: "Dni do wypłaty",
             confirm: "Zatwierdź",
-            cancel: "Wróć"
+            cancel: "Wróć",
+            shredder: "NISZCZARKA DŁUGÓW"
         }
     },
     
@@ -73,19 +78,24 @@ const LEDGER_STRINGS = {
             panic: "PUT IT BACK! We can't afford such luxuries!",
             night: "Boss, 3 AM... Counting cash or sheep? Go to sleep.",
             vision: "Do you want to just look at it, or actually own it?",
-            shred: "One enemy less. Debt documentation shredded."
+            shred: "One enemy less. Debt documentation shredded.",
+            decoy: "Decoy mode active. Officially, we are broke.",
+            pills: "Leeches are sucking your account dry. Look at these subs!"
         },
         
-        // UI
+        // UI V2
         ui: {
             today: "AVAILABLE TODAY",
             stash: "STASH",
             vision: "VISION",
+            notes: "NOTES",
+            survival: "Fuel for",
+            days: "days",
             ghost_now: "NOW",
             ghost_future: "FORECAST",
-            days_left: "Days to payday",
             confirm: "Confirm",
-            cancel: "Back"
+            cancel: "Back",
+            shredder: "DEBT SHREDDER"
         }
     }
 };
@@ -97,7 +107,7 @@ function getString(path) {
     let result = LEDGER_STRINGS[lang];
     
     for (const key of keys) {
-        if (result[key]) {
+        if (result && result[key]) {
             result = result[key];
         } else {
             return path;
