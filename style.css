@@ -1,7 +1,6 @@
 /* --- LEDGERCOON: SHADOW PROTOCOL V2 (SOVEREIGN STYLES) --- */
 
 :root {
-    /* PROFIL: MAN (Tactical Boss) */
     --bg-main: #0f172a;
     --bg-grad: radial-gradient(at 0% 0%, #1e293b 0, transparent 50%), 
                radial-gradient(at 100% 0%, #0f172a 0, transparent 50%);
@@ -13,28 +12,21 @@
 }
 
 [data-user="woman"] {
-    /* PROFIL: WOMAN (Silk & Gold) */
     --bg-main: #1a101d;
-    --bg-grad: radial-gradient(at 0% 0%, #2d1b31 0, transparent 50%), 
-               radial-gradient(at 100% 0%, #1a101d 0, transparent 50%);
     --accent: #ffcf71;
     --card-bg: rgba(45, 27, 49, 0.7);
 }
 
 [data-user="child"] {
-    /* PROFIL: CHILD (Electric Raccoon) */
     --bg-main: #0e1624;
-    --bg-grad: radial-gradient(at 0% 0%, #1a2c42 0, transparent 50%), 
-               radial-gradient(at 100% 0%, #ff8c00 0, transparent 100%);
     --accent: #ff8c00;
 }
 
-/* --- FUNDAMENTY --- */
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* --- GLOBALNE --- */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body { 
-    margin: 0; font-family: 'Inter', -apple-system, sans-serif; 
-    background-color: var(--bg-main);
-    background-image: var(--bg-grad);
+    margin: 0; font-family: 'Inter', sans-serif; 
+    background-color: var(--bg-main); background-image: var(--bg-grad);
     color: var(--text); height: 100vh; overflow: hidden;
 }
 
@@ -45,84 +37,64 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* --- NAGŁÓWEK I AVATAR --- */
+/* --- FIX EKRANU STARTOWEGO (SPLASH) --- */
+#splash-screen {
+    position: fixed; inset: 0; background: var(--bg-main);
+    z-index: 9999; display: flex; justify-content: center; align-items: center;
+    transition: opacity 0.8s ease;
+}
+
+.splash-content {
+    text-align: center; width: 90%; max-width: 400px;
+    display: flex; flex-direction: column; align-items: center;
+}
+
+.splash-logo {
+    width: 65%; /* Zmniejszono, aby nie było "przybliżone" */
+    max-width: 220px; height: auto;
+    margin-bottom: 20px; border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.glitch-text { font-size: 2.2rem; font-weight: 900; color: var(--accent); margin: 10px 0; letter-spacing: -1px; }
+
+#splash-quote { font-size: 0.9rem; opacity: 0.7; font-style: italic; margin: 10px 0; padding: 0 20px; }
+
+.handle { 
+    display: block; margin-top: 20px; font-weight: 800; 
+    color: var(--accent); font-size: 0.85rem; letter-spacing: 1px;
+}
+
+.tap-hint { font-size: 0.7rem; margin-top: 40px; opacity: 0.4; animation: pulse 2s infinite; }
+
+@keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.6; } }
+
+/* --- DASHBOARD --- */
 .main-header { display: flex; justify-content: space-between; padding: 50px 20px 10px; align-items: center; }
-
-.user-pill { 
-    display: flex; align-items: center; padding: 6px 15px; border-radius: 50px; 
-    gap: 12px; border: 1px solid rgba(255,255,255,0.05);
-}
-
-.avatar-circle { 
-    width: 42px; height: 42px; border-radius: 50%; 
-    border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent);
-}
-
-#rank-name { font-size: 0.65rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-
+.user-pill { display: flex; align-items: center; padding: 6px 15px; border-radius: 50px; gap: 12px; }
+.avatar-circle { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent); box-shadow: 0 0 15px var(--accent); }
+#rank-name { font-size: 0.65rem; font-weight: 900; color: var(--accent); text-transform: uppercase; }
 .xp-bar-mini { width: 60px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 4px; overflow: hidden; }
 #xp-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+#clock-display { font-weight: 800; font-size: 0.9rem; text-align: right; line-height: 1.2; }
 
-#clock-display { font-weight: 800; font-size: 0.9rem; text-align: right; padding: 10px 15px; border-radius: 15px; }
-
-/* --- STATUS STASZKA (NAPRAWIONE SKALOWANIE) --- */
+/* --- STASHEK I KARTA --- */
 .stashek-status { display: flex; flex-direction: column; align-items: center; margin: 15px 0; }
+#stashek-mood { width: 100px; height: auto; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
+.speech-bubble { margin-top: 10px; padding: 12px 20px; border-radius: 20px; max-width: 85%; text-align: center; font-size: 0.85rem; }
 
-#stashek-mood { 
-    width: 100px; height: auto; transition: transform 0.3s ease; 
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
-}
+.budget-card { border-radius: 35px; margin: 0 20px; padding: 40px 20px; text-align: center; }
+#daily-amount { font-size: 4rem; font-weight: 900; margin: 5px 0; letter-spacing: -3px; }
+.streak-badge { display: inline-block; padding: 8px 18px; border-radius: 25px; background: rgba(0,0,0,0.3); font-size: 0.8rem; font-weight: 700; }
 
-.speech-bubble { 
-    margin-top: 10px; padding: 12px 20px; border-radius: 20px; 
-    max-width: 85%; text-align: center; font-size: 0.85rem; line-height: 1.4;
-}
-
-/* --- KARTA BUDŻETU --- */
-.budget-card { border-radius: 35px; margin: 0 20px; padding: 35px 20px; text-align: center; position: relative; }
-.label { font-size: 0.7rem; opacity: 0.6; letter-spacing: 2px; font-weight: 700; margin-bottom: 5px; }
-#daily-amount { font-size: 3.8rem; font-weight: 900; margin: 5px 0; letter-spacing: -2px; }
-
-.streak-badge { 
-    display: inline-block; padding: 6px 15px; border-radius: 20px; 
-    background: rgba(0,0,0,0.3); font-size: 0.75rem; font-weight: 600;
-}
-
-.shadow-glow { box-shadow: 0 0 15px var(--accent); }
-
-/* --- NOTES I SKARBIEC --- */
-.quick-notes { margin: 20px; padding: 15px; border-radius: 20px; font-size: 0.8rem; }
-#memo-preview { opacity: 0.5; font-style: italic; }
-
+/* --- MODALE I WIDOKI --- */
 .hidden-view { position: fixed; inset: 0; background: var(--bg-main); z-index: 3000; padding: 40px 20px; overflow-y: auto; display: none; flex-direction: column; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; z-index: 4000; align-items: center; justify-content: center; }
+.modal-content { width: 90%; padding: 30px; border-radius: 35px; }
 
-.vision-target { 
-    width: 100%; height: 160px; border-radius: 25px; margin-bottom: 20px;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    border: 2px dashed rgba(255,255,255,0.1); overflow: hidden; position: relative;
-}
+/* --- NAWIGACJA --- */
+.bottom-nav { position: fixed; bottom: 0; width: 100%; height: 110px; display: flex; justify-content: space-around; align-items: center; padding-bottom: 40px; }
+.add-btn { width: 75px; height: 75px; background: var(--accent); border-radius: 50%; border: none; font-size: 2.8rem; transform: translateY(-20px); box-shadow: 0 10px 25px rgba(0,255,136,0.4); }
 
-.progress-container { width: 80%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 10px; }
-#vision-fill { height: 100%; background: var(--gold); box-shadow: 0 0 10px var(--gold); transition: width 0.6s ease; }
-
-.notes-area textarea { 
-    width: 100%; height: 150px; background: transparent; border: none; 
-    color: var(--text); font-family: 'Courier New', monospace; resize: none; outline: none; padding: 10px;
-}
-
-/* --- NAWIGACJA DOLNA --- */
-.bottom-nav { position: fixed; bottom: 0; width: 100%; height: 100px; display: flex; justify-content: space-around; align-items: center; padding-bottom: 30px; }
-.add-btn { width: 70px; height: 70px; background: var(--accent); border-radius: 50%; border: none; font-size: 2.5rem; transform: translateY(-15px); }
-
-/* --- GAME UI --- */
-#gameCanvas { width: 100%; background: #000; border-radius: 20px; }
-.game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.game-hint { text-align: center; font-size: 0.7rem; opacity: 0.5; margin-top: 10px; }
-
-/* --- MODALE --- */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; z-index: 4000; align-items: center; justify-content: center; }
-.modal-content { width: 90%; padding: 30px; border-radius: 30px; }
-.input-group input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 15px; margin: 10px 0; font-size: 1.1rem; }
-
-.btn-pri { background: var(--accent); color: #000; border: none; padding: 15px 25px; border-radius: 15px; font-weight: 800; width: 100%; }
-.btn-sec { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 15px; width: 100%; margin-top: 10px; }
+/* --- EFEKTY --- */
+.blur-data #daily-amount { filter: blur(20px); transition: filter 0.3s ease; }
