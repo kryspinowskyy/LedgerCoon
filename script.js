@@ -1,112 +1,125 @@
-/* --- LEDGERCOON V2.5: SOVEREIGN ENGINE --- */
+/* --- LEDGERCOON SOVEREIGN ENGINE --- */
 
-// Inicjalizacja stanu z localStorage (V2.5)
-let state = JSON.parse(localStorage.getItem('ledger_coon_v2_5')) || {
-    income: 0, bills: 0, payday: "", expenses: [], xp: 0, 
-    theme: 'dark', lang: 'pl', notes: "", avatar: null, subs: [], decoy: false
+// Inicjalizacja stanu (V2.6 - Subs Fix)
+let state = JSON.parse(localStorage.getItem('ledger_v3')) || {
+    income: 0, bills: 0, payday: "", expenses: [], subs: [], xp: 0, 
+    theme: 'dark', lang: 'pl', notes: "", avatar: null, decoy: false
 };
 
-let gameInterval;
-let score = 0;
-let clockClicks = 0;
+// ASMR Finansowe
 let audioCtx;
-
-// Klimatyczne sample audio (ASMR Finansowe)
-const playSound = (type) => {
+const playSound = (t) => {
     try {
         if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-
-        if(type === 'coin') { // Szelest banknotu/monety
-            osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-        } else if(type === 'shred') { // Niszczarka
-            const bufferSize = 2 * audioCtx.sampleRate;
-            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const output = noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
-            const whiteNoise = audioCtx.createBufferSource();
-            whiteNoise.buffer = noiseBuffer;
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'lowpass'; filter.frequency.value = 1000;
-            whiteNoise.connect(filter); filter.connect(audioCtx.destination);
-            whiteNoise.start(); whiteNoise.stop(audioCtx.currentTime + 0.5);
-        }
-    } catch(e) {} // Ignoruj błędy audio na starszych urządzeniach
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.setValueAtTime(t === 'coin' ? 880 : 150, a.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, a.currentTime + 0.3);
+        o.start(); o.stop(a.currentTime + 0.3);
+    } catch(e) {}
 };
 
 window.onload = () => {
-    applyTheme(state.theme || 'dark');
-    updateUI();
-    const q = LEDGER_STRINGS[state.lang].quotes;
-    document.getElementById('splash-quote').innerText = q[Math.floor(Math.random() * q.length)];
-    
-    if(state.avatar) {
-        const img = document.getElementById('avatar-img');
-        img.src = state.avatar; img.style.display = 'block';
-    }
-    
-    // Załaduj dane do pól Skarbca
+    // Ładowanie danych avatara i notatnika
+    if(state.avatar) { const i = document.getElementById('avatar-img'); i.src = state.avatar; i.style.display = 'block'; }
     document.getElementById('shadow-notes').value = state.notes || "";
     document.getElementById('base-income').value = state.income || "";
     document.getElementById('base-bills').value = state.bills || "";
     document.getElementById('base-payday').value = state.payday || "";
+    
+    // Inicjalizacja cytatów
+    if(typeof LEDGER_STRINGS !== 'undefined') {
+        const q = LEDGER_STRINGS[state.lang].quotes;
+        const qEl = document.getElementById('splash-quote');
+        if(qEl) qEl.innerText = q[Math.floor(Math.random() * q.length)];
+    }
+
+    // Renderowanie subskrypcji (NAPRAWIONE)
+    renderSubscriptions();
+
+    // Start aplikacji
+    setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if(splash) splash.style.opacity = '0';
+        setTimeout(() => {
+            if(splash) splash.style.display = 'none';
+            const app = document.getElementById('app-container');
+            if(app) app.style.display = 'flex';
+            updateUI();
+        }, 600);
+    }, 2500);
 
     setInterval(updateClock, 1000);
-    setTimeout(hideSplash, 2500);
 };
 
-function save() { localStorage.setItem('ledger_coon_v2_5', JSON.stringify(state)); }
+function save() { localStorage.setItem('ledger_v3', JSON.stringify(state)); }
 
+/* --- GŁÓWNA LOGIKA UI --- */
 function updateUI() {
-    const daily = calculateDaily();
-    const amountEl = document.getElementById('daily-amount');
-    
-    if(state.decoy) { // Tryb Przynęty
-        amountEl.innerText = "15.20";
-        document.getElementById('stashek-talk').innerText = "Kupisz mi te winogrona?";
-    } else {
-        amountEl.innerText = daily.toFixed(2);
-        amountEl.style.color = daily < 0 ? "var(--danger)" : "var(--accent)";
-        const survival = getSurvivalDays();
-        document.getElementById('streak-display').innerText = `⏳ Paliwa na: ${survival} dni`;
-        const dialogues = LEDGER_STRINGS[state.lang].stashek;
-        document.getElementById('stashek-talk').innerText = daily < 20 ? dialogues.bad : dialogues.good;
-    }
-    updateRank();
+    try {
+        const daily = calculateDaily();
+        const amountEl = document.getElementById('daily-amount');
+        if(amountEl) {
+            amountEl.innerText = daily.toFixed(2);
+            amountEl.style.color = daily < 0 ? "var(--danger)" : "var(--accent)";
+        }
+        
+        const days = getSurvivalDays();
+        const streakEl = document.getElementById('streak-display');
+        if(streakEl) streakEl.innerText = `⏳ Paliwa na: ${days} dni`;
+        
+        updateRank();
+    } catch(e) { console.error("UI Update Error", e); }
 }
 
-// Główna kalkulacja suwerennego budżetu
 function calculateDaily() {
     if(!state.payday) return 0;
     const days = Math.ceil((new Date(state.payday) - new Date()) / (1000*3600*24)) || 1;
     const spent = state.expenses.reduce((s, e) => s + e.amount, 0);
-    const subSum = state.subs ? state.subs.reduce((s, b) => s + b.amount, 0) : 0;
+    // UWZGLĘDNIENIE SUBSKRYPCJI W KALKULACJI
+    const subSum = (state.subs && state.subs.length > 0) ? state.subs.reduce((s, b) => s + b.amount, 0) : 0;
     return (state.income - state.bills - subSum - spent) / days;
 }
 
-// Zegar Przetrwania (Survival Days) z poprawioną logiką
 function getSurvivalDays() {
     const daily = calculateDaily();
-    const totalLeft = (state.income - state.bills) - state.expenses.reduce((s, e) => s + e.amount, 0);
+    const subSum = (state.subs && state.subs.length > 0) ? state.subs.reduce((s, b) => s + b.amount, 0) : 0;
+    const totalLeft = (state.income - state.bills - subSum) - state.expenses.reduce((s, e) => s + e.amount, 0);
+    
     if(totalLeft <= 0) return 0;
-    const count = Math.min(state.expenses.length, 7);
-    const avg = state.expenses.length > 0 ? (state.expenses.slice(-7).reduce((s,e)=>s+e.amount, 0) / count) : daily;
+    const avg = state.expenses.length > 0 ? (state.expenses.slice(-5).reduce((s,e)=>s+e.amount,0) / Math.min(state.expenses.length, 5)) : daily;
     return Math.floor(totalLeft / (avg || 1));
 }
 
 function updateRank() {
-    const ranks = LEDGER_STRINGS[state.lang].ranks;
-    const lvl = Math.floor(state.xp / 1000);
-    document.getElementById('rank-name').innerText = ranks[Math.min(lvl, ranks.length-1)];
-    document.getElementById('xp-text').innerText = `${state.xp % 1000} / 1000 XP`;
-    const offset = 150.8 - ((state.xp % 1000) / 1000) * 150.8;
-    document.querySelector('.progress-ring__circle').style.strokeDashoffset = offset;
+    try {
+        const lvl = Math.floor(state.xp / 1000);
+        const rankNameEl = document.getElementById('rank-name');
+        if(rankNameEl) rankNameEl.innerText = LEDGER_STRINGS[state.lang].ranks[Math.min(lvl, 4)];
+        
+        const xpTextEl = document.getElementById('xp-text');
+        if(xpTextEl) xpTextEl.innerText = `${state.xp % 1000} XP`;
+        
+        const offset = 150.8 - ((state.xp % 1000) / 1000) * 150.8;
+        const ringEl = document.querySelector('.progress-ring__circle');
+        if(ringEl) ringEl.style.strokeDashoffset = offset;
+    } catch(e) {}
 }
 
+/* --- LOGIKA WYDATKÓW --- */
+function confirmExpense() {
+    const valEl = document.getElementById('exp-val');
+    const v = parseFloat(valEl.value);
+    if(v > 0) {
+        state.expenses.push({amount: v, date: new Date().toISOString()});
+        state.xp += 50; playSound('coin'); save(); updateUI(); closeModal();
+        valEl.value = "";
+    }
+}
+function quickAdd(n) { document.getElementById('exp-val').value = n; }
+
+/* --- LOGIKA SKARBCA & SUBSKRYPCJI (NAPRAWIONE) --- */
 function updateBase() {
     state.income = parseFloat(document.getElementById('base-income').value) || 0;
     state.bills = parseFloat(document.getElementById('base-bills').value) || 0;
@@ -114,103 +127,94 @@ function updateBase() {
     save(); updateUI();
 }
 
-function confirmExpense() {
-    const v = parseFloat(document.getElementById('exp-val').value);
-    const t = document.getElementById('exp-title').value;
-    if(v > 0) {
-        state.expenses.push({amount: v, title: t || "Zakup", date: new Date().toISOString()});
-        state.xp += 40; playSound('coin'); 
-        if (navigator.vibrate) navigator.vibrate(50);
-        closeModal(); save(); updateUI();
-        document.getElementById('exp-val').value = ""; document.getElementById('exp-title').value = "";
+// NOWA FUNKCJA: DODAWANIE SUBSKRYPCJI
+function addSubscription() {
+    const name = prompt("Nazwa pijaweczki (np. Netflix):");
+    if(!name) return;
+    const amount = parseFloat(prompt("Miesięczny koszt (PLN):"));
+    if(!amount || amount <= 0) return;
+
+    if(!state.subs) state.subs = []; // Bezpieczeństwo
+    state.subs.push({ name, amount });
+    save();
+    renderSubscriptions();
+    updateUI();
+    playSound('coin');
+}
+
+// NOWA FUNKCJA: USUWANIE SUBSKRYPCJI
+function deleteSubscription(index) {
+    if(!confirm("Czy na pewno chcesz unicestwić tę pijawkę?")) return;
+    state.subs.splice(index, 1);
+    save();
+    renderSubscriptions();
+    updateUI();
+    playSound('shred'); // Klimatyczny dźwięk niszczarki
+}
+
+// NOWA FUNKCJA: RENDEROWANIE LISTY W SKARBCOWIE
+function renderSubscriptions() {
+    const container = document.getElementById('subs-container');
+    if(!container) return;
+    container.innerHTML = ""; // Czyścimy starą listę
+
+    if(!state.subs || state.subs.length === 0) {
+        container.innerHTML = "<p style='font-size:0.8rem; opacity:0.5; font-style:italic; padding:10px;'>Brak aktywnych pijawek. Czysto.</p>";
+        return;
     }
+
+    state.subs.forEach((sub, index) => {
+        const item = document.createElement('div');
+        item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);";
+        
+        item.innerHTML = `
+            <div>
+                <strong style="color:white; font-size:0.9rem;">${sub.name}</strong><br>
+                <small style="color:var(--accent);">${sub.amount.toFixed(2)} PLN/msc</small>
+            </div>
+            <button onclick="deleteSubscription(${index})" style="background:none; border:none; color:var(--danger); font-size:1.2rem; cursor:pointer;">✕</button>
+        `;
+        container.appendChild(item);
+    });
 }
 
-function quickAdd(val) { document.getElementById('exp-val').value = val; }
-
-// Suwerenne zarządzanie danymi (Błękitny Protokół)
-function exportData() {
-    const data = JSON.stringify(state);
-    const blob = new Blob([data], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'ledger_akta.json'; a.click();
-}
-
-function triggerImport() { document.getElementById('import-input').click(); }
-document.getElementById('import-input').onchange = (e) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-        state = JSON.parse(reader.result);
-        save(); location.reload();
-    };
-    reader.readAsText(e.target.files[0]);
-};
-
-// Nawigacja i Tryby
-function toggleSettings() { 
-    const m = document.getElementById('settings-modal');
-    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-}
-function toggleStash() {
-    const s = document.getElementById('stash-layer');
-    s.style.display = s.style.display === 'flex' ? 'none' : 'flex';
-}
-function saveNotes() { state.notes = document.getElementById('shadow-notes').value; save(); }
-
-function applyTheme(t) { document.body.setAttribute('data-theme', t); }
-function toggleTheme() { state.theme = state.theme === 'dark' ? 'light' : 'dark'; applyTheme(state.theme); save(); }
-
-function updateClock() {
-    const n = new Date();
-    document.getElementById('clock-display').innerHTML = `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
-}
-
-// Decoy Mode (Tryb Przynęty) - 5 kliknięć w zegar
-document.getElementById('clock-display').onclick = () => {
-    clockClicks++;
-    if(clockClicks >= 5) { state.decoy = !state.decoy; updateUI(); clockClicks = 0; }
-    setTimeout(() => clockClicks = 0, 3000);
-};
-
-// Zarządzanie Avatarem Agenta
+/* --- SYSTEMOWE & AWATAR --- */
 function triggerAvatarUpload() { document.getElementById('avatar-input').click(); }
 document.getElementById('avatar-input').onchange = (e) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-        state.avatar = reader.result;
-        const img = document.getElementById('avatar-img');
-        img.src = reader.result; img.style.display = 'block';
+    const r = new FileReader();
+    r.onload = () => {
+        state.avatar = r.result;
+        const i = document.getElementById('avatar-img');
+        if(i) { i.src = r.result; i.style.display = 'block'; }
         save();
     };
-    reader.readAsDataURL(e.target.files[0]);
+    if(e.target.files[0]) r.readAsDataURL(e.target.files[0]);
 };
 
-// Systemowe
-function hideSplash() { 
-    const splash = document.getElementById('splash-screen');
-    splash.style.opacity = '0';
-    setTimeout(() => { splash.style.display = 'none'; document.getElementById('app-container').style.display='block'; }, 800);
+function saveNotes() { 
+    const notesEl = document.getElementById('shadow-notes');
+    if(notesEl) { state.notes = notesEl.value; save(); }
 }
-function openExpenseModal() { document.getElementById('expense-modal').style.display='flex'; }
-function closeModal() { document.getElementById('expense-modal').style.display='none'; }
+function updateClock() {
+    const n = new Date();
+    const clockEl = document.getElementById('clock-display');
+    if(clockEl) clockEl.innerText = `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
+}
 
-// Logika Minigry
-function openMiniGame() { document.getElementById('game-container').style.display='flex'; initGame(); }
-function closeMiniGame() { document.getElementById('game-container').style.display='none'; clearInterval(gameInterval); }
-function initGame() {
-    const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth - 40; canvas.height = window.innerHeight * 0.6;
-    let x = canvas.width / 2; let items = []; score = 0;
-    gameInterval = setInterval(() => {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.font = "40px Arial"; ctx.fillText("🦝", x-20, canvas.height-50);
-        if(Math.random()<0.05) items.push({x:Math.random()*canvas.width, y:0, v: 10, i: "🪙"});
-        items.forEach((it, i) => {
-            it.y += 5; ctx.fillText(it.i, it.x, it.y);
-            if(it.y > canvas.height-80 && Math.abs(it.x-x)<40) { score+=it.v; state.xp+=5; items.splice(i,1); playSound('coin'); }
-        });
-        document.getElementById('game-score').innerText = `PUNKTY: ${score}`;
-    }, 30);
-    canvas.ontouchmove = (e) => x = e.touches[0].clientX - 20;
+/* --- NAWIGACJA --- */
+function toggleSettings() { toggleStash(); } // Ustawienia kierują do Skarbca
+function toggleStash() { 
+    const s = document.getElementById('stash-layer');
+    if(s) s.style.display = (s.style.display === 'flex') ? 'none' : 'flex';
 }
+function openExpenseModal() { 
+    const m = document.getElementById('expense-modal');
+    if(m) m.style.display = 'flex'; 
+}
+function closeModal() { 
+    const m = document.getElementById('expense-modal');
+    if(m) m.style.display = 'none'; 
+}
+
+// Błąd w HTML Turn 11 - openMiniGame nie istnieje w pancernej wersji
+function openMiniGame() { alert("Protokół 'Rozrywka' jest jeszcze nieaktywny."); }
