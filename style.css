@@ -1,9 +1,9 @@
+/* --- LEDGERCOON SOVEREIGN: EMERGENCY LAYOUT FIX --- */
 :root {
     --bg-main: #0b111b;
     --accent: #00d2ff;
-    --card-bg: rgba(21, 32, 51, 0.8);
+    --card-bg: rgba(21, 32, 51, 0.9);
     --text: #f1f5f9;
-    --danger: #ff4b5c;
 }
 
 [data-theme="light"] {
@@ -13,109 +13,95 @@
     --text: #1e293b;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body { 
     font-family: 'Inter', sans-serif; 
     background: var(--bg-main); 
     color: var(--text); 
     height: 100vh; 
-    width: 100vw;
     overflow: hidden; 
 }
 
-/* KONTENER GŁÓWNY - musi trzymać pion */
+/* GŁÓWNY KONTENER */
 #app-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh;
     width: 100%;
-    padding-top: env(safe-area-inset-top); /* Dla iPhone'ów */
 }
 
-/* NAGŁÓWEK - naprawione wyrównanie */
+/* NAGŁÓWEK */
 .main-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    height: 80px;
+    padding: 40px 20px 10px;
+    height: 100px;
 }
 
-.profile-section { display: flex; align-items: center; gap: 12px; }
-
-.avatar-wrapper { position: relative; width: 50px; height: 50px; flex-shrink: 0; }
-.avatar-circle { 
-    width: 42px; height: 42px; border-radius: 50%; 
-    background: rgba(255,255,255,0.05); 
-    overflow: hidden; margin: 4px; 
-}
+.profile-section { display: flex; align-items: center; gap: 10px; }
+.avatar-wrapper { position: relative; width: 50px; height: 50px; }
+.avatar-circle { width: 40px; height: 40px; border-radius: 50%; background: #152033; overflow: hidden; margin: 5px; border: 1px solid var(--accent); }
 .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+.progress-ring { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
 
-.progress-ring { position: absolute; transform: rotate(-90deg); top: 0; left: 0; }
-
-.rank-info { display: flex; flex-direction: column; }
-#rank-name { font-weight: 900; color: var(--accent); font-size: 0.7rem; text-transform: uppercase; }
-#xp-text { font-size: 0.6rem; opacity: 0.6; }
-
-.glass-clock { font-weight: 800; font-size: 1rem; opacity: 0.8; }
-
-/* DASHBOARD - centrum */
+/* DASHBOARD - TO TU BYŁ PROBLEM */
 #dashboard {
-    flex-grow: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    gap: 20px;
+    padding: 10px 20px;
 }
 
-/* STASHEK - tutaj był błąd wielkości */
-.stashek-box { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
+.stashek-box {
+    text-align: center;
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
+    margin-bottom: 20px;
 }
 
-#stashek-mood { 
-    width: 120px; /* Sztywna szerokość */
-    height: auto; 
-    margin-top: 15px;
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+/* SZTYWNA BLOKADA ROZMIARU STASZKA */
+#stashek-mood {
+    width: 120px !important; /* Sztywna szerokość */
+    height: 120px !important; /* Sztywna wysokość */
+    object-fit: contain !important;
+    margin: 10px auto !important;
+    display: block !important;
 }
 
-.speech-bubble { 
-    padding: 15px 20px; 
-    border-radius: 20px; 
+.speech-bubble {
     background: var(--card-bg);
-    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 20px;
     border: 1px solid rgba(255,255,255,0.1);
-    text-align: center; 
     font-size: 0.9rem;
-    width: 100%;
+    line-height: 1.4;
 }
 
 /* KARTA BUDŻETU */
-.budget-card { 
+.budget-card {
     width: 100%;
-    max-width: 350px;
-    padding: 30px 20px; 
-    text-align: center; 
-    background: var(--card-bg);
+    max-width: 340px;
+    padding: 30px 20px;
     border-radius: 30px;
+    background: var(--card-bg);
+    text-align: center;
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-.label { font-size: 0.7rem; letter-spacing: 2px; opacity: 0.6; margin-bottom: 5px; }
-#daily-amount { font-size: 3.5rem; font-weight: 900; color: var(--accent); letter-spacing: -2px; }
-.survival-badge { margin-top: 10px; font-size: 0.75rem; font-weight: 700; opacity: 0.8; }
+#daily-amount {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -2px;
+}
 
 /* NAWIGACJA */
 .bottom-nav {
-    height: 100px;
+    height: 90px;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -123,28 +109,34 @@ body {
 }
 
 .add-btn {
-    width: 70px; height: 70px;
+    width: 65px; height: 65px;
     background: var(--accent);
     border-radius: 50%;
     border: none;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: bold;
-    box-shadow: 0 10px 20px rgba(0,210,255,0.4);
+    box-shadow: 0 8px 20px rgba(0, 210, 255, 0.4);
 }
 
-.nav-icon { font-size: 1.5rem; background: transparent; border: none; color: var(--text); }
+.nav-icon { font-size: 1.5rem; color: var(--text); background: none; border: none; }
 
-/* SPLASH SCREEN */
+/* MODALE */
+.hidden-view, .modal {
+    position: fixed; inset: 0;
+    background: var(--bg-main);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    padding: 40px 20px;
+}
+
 #splash-screen {
-    position: fixed; inset: 0; background: var(--bg-main);
-    z-index: 9999; display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    transition: opacity 0.5s ease;
+    position: fixed; inset: 0;
+    background: var(--bg-main);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
-.splash-logo { width: 150px; height: 150px; border-radius: 30px; object-fit: cover; margin-bottom: 20px; }
-
-/* MODALE I RESZTA - ukryte */
-.modal, .hidden-view {
-    position: fixed; inset: 0; background: var(--bg-main);
-    z-index: 10000; display: none; padding: 40px 20px;
-}
+.splash-logo { width: 140px; height: 140px; border-radius: 30px; margin-bottom: 20px; }
