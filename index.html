@@ -15,7 +15,7 @@
             <img src="img/splash.png" alt="LedgerCoon" class="splash-logo">
             <h1 class="glitch-text">LedgerCoon</h1>
             <div class="quote-container">
-                <p id="splash-quote">"Ładuję protokoły finansowe..."</p>
+                <p id="splash-quote">"Inicjalizacja protokołów..."</p>
             </div>
             <span class="handle">@kryspinowskyy</span>
         </div>
@@ -29,7 +29,7 @@
                         <circle class="progress-ring__circle" stroke="#00d2ff" stroke-width="3" fill="transparent" r="24" cx="27" cy="27"/>
                     </svg>
                     <div id="user-avatar" class="avatar-circle">
-                        <img id="avatar-img" src="img/icon.png">
+                        <img id="avatar-img" src="" style="display:none;">
                     </div>
                 </div>
                 <div class="rank-info">
@@ -37,19 +37,19 @@
                     <small id="xp-text">0 / 1000 XP</small>
                 </div>
             </div>
-            <div id="clock-display" class="glass-clock">00:00</div>
+            <div id="clock-display" class="glass-clock" title="Kliknij 5x dla Decoy Mode">00:00</div>
         </header>
 
         <main id="dashboard">
             <div class="stashek-box">
                 <div class="speech-bubble glass">
-                    <p id="stashek-talk">"Księgi otwarte. Co tam psujemy dzisiaj, Szefie?"</p>
+                    <p id="stashek-talk">"Księgi otwarte. Co tam psujemy dzisiaj?"</p>
                 </div>
-                <img src="img/icon.png" id="stashek-mood" alt="Stashek">
+                <img src="img/icon.png" id="stashek-mood">
             </div>
 
             <div class="budget-card glass">
-                <p class="label">DOSTĘPNE DZIŚ</p>
+                <p class="label">LIMIT DZIENNY</p>
                 <h2 id="daily-amount">0.00</h2>
                 <div class="survival-badge" id="streak-display">⏳ Paliwa na: -- dni</div>
             </div>
@@ -64,11 +64,12 @@
 
     <div id="settings-modal" class="modal">
         <div class="modal-content glass">
-            <h3>OPERACJE</h3>
-            <button class="btn-sec" onclick="toggleTheme()">ZMIEŃ MOTYW (🌞/🌙)</button>
-            <button class="btn-sec" onclick="toggleLanguage()">JĘZYK (PL/EN)</button>
-            <button class="btn-sec" onclick="toggleStash()">SKARBIEC & NOTATKI</button>
-            <button class="btn-pri" onclick="toggleSettings()">ZAMKNIJ</button>
+            <h3>PANEL OPERACYJNY</h3>
+            <button class="btn-sec" onclick="toggleTheme()">MOTYW (JASNY/CIEMNY)</button>
+            <button class="btn-sec" onclick="toggleStash()">SKARBIEC & PLANOWANIE</button>
+            <button class="btn-sec" onclick="exportData()">EKSPORTUJ AKTA (.JSON)</button>
+            <button class="btn-sec" onclick="triggerImport()">IMPORTUJ AKTA</button>
+            <button class="btn-pri" onclick="toggleSettings()">POWRÓT</button>
         </div>
     </div>
 
@@ -78,24 +79,38 @@
             <h2>SKARBIEC</h2>
         </div>
         <div class="stash-content">
-            <div class="notes-area glass">
-                <small>TAJNE ZAPISKI (STRATEGIA)</small>
-                <textarea id="shadow-notes" oninput="saveNotes()" placeholder="Tu wpisz swoje plany finansowe..."></textarea>
+            <div class="planning-box glass">
+                <small>ODPRAWA MIESIĘCZNA</small>
+                <input type="number" id="base-income" placeholder="Przychód netto" onchange="updateBase()">
+                <input type="number" id="base-bills" placeholder="Suma rachunków" onchange="updateBase()">
+                <input type="date" id="base-payday" onchange="updateBase()">
             </div>
+
+            <div class="notes-area glass">
+                <small>STRATEGIA (NOTATNIK)</small>
+                <textarea id="shadow-notes" oninput="saveNotes()" placeholder="Twoje cele i plany..."></textarea>
+            </div>
+
             <div id="subs-list" class="glass">
-                <small>AKTYWNE PIJAWKI (SUBSKRYPCJE)</small>
+                <small>PIJAWKI (SUBSKRYPCJE)</small>
                 <div id="subs-container"></div>
+                <button class="btn-sec" style="font-size: 0.7rem;" onclick="addSubscription()">+ DODAJ SUBSKRYPCJĘ</button>
             </div>
         </div>
     </div>
 
     <div id="expense-modal" class="modal">
         <div class="modal-content glass">
+            <div class="quick-amounts">
+                <button onclick="quickAdd(10)">+10</button>
+                <button onclick="quickAdd(20)">+20</button>
+                <button onclick="quickAdd(50)">+50</button>
+            </div>
             <input type="number" id="exp-val" placeholder="0.00" inputmode="decimal">
-            <input type="text" id="exp-title" placeholder="Na co to poszło?">
+            <input type="text" id="exp-title" placeholder="Na co poszło?">
             <div class="modal-actions">
                 <button onclick="closeModal()" class="btn-sec">ANULUJ</button>
-                <button onclick="confirmExpense()" class="btn-pri">DODAJ</button>
+                <button onclick="confirmExpense()" class="btn-pri">ZATWIERDŹ</button>
             </div>
         </div>
     </div>
@@ -109,5 +124,6 @@
     </div>
 
     <input type="file" id="avatar-input" style="display:none" accept="image/*">
+    <input type="file" id="import-input" style="display:none" accept=".json">
 </body>
 </html>
