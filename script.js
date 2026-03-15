@@ -1,202 +1,79 @@
-/* --- LEDGERCOON V2.5: SOVEREIGN ENGINE --- */
+/* --- LEDGERCOON SOVEREIGN: ROBUST ENGINE --- */
 
-let state = JSON.parse(localStorage.getItem('ledger_coon_v2_5')) || {
-    income: 0, bills: 0, payday: "", expenses: [], xp: 0, 
-    theme: 'dark', lang: 'pl', notes: "", avatar: null, subs: [], decoy: false
-};
-
-let gameInterval;
-let score = 0;
-let clockClicks = 0;
-
-// Audio Samples (Web Audio API)
-const playSound = (type) => {
-    const audio = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audio.createOscillator();
-    const gain = audio.createGain();
-    osc.connect(gain);
-    gain.connect(audio.destination);
-
-    if(type === 'coin') { // Dźwięk banknotu/monety
-        osc.type = 'sine'; osc.frequency.setValueAtTime(880, audio.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 0.3);
-        osc.start(); osc.stop(audio.currentTime + 0.3);
-    } else if(type === 'shred') { // Dźwięk niszczarki
-        const bufferSize = 2 * audio.sampleRate;
-        const noiseBuffer = audio.createBuffer(1, bufferSize, audio.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
-        const whiteNoise = audio.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-        const filter = audio.createBiquadFilter();
-        filter.type = 'lowpass'; filter.frequency.value = 1000;
-        whiteNoise.connect(filter); filter.connect(audio.destination);
-        whiteNoise.start(); whiteNoise.stop(audio.currentTime + 0.5);
-    }
-};
+// 1. Zabezpieczenie danych
+let state;
+try {
+    state = JSON.parse(localStorage.getItem('ledger_v2_5')) || {
+        income: 0, bills: 0, payday: "", expenses: [], xp: 0, theme: 'dark', lang: 'pl', notes: "", avatar: null
+    };
+} catch (e) {
+    state = { income: 0, bills: 0, payday: "", expenses: [], xp: 0, theme: 'dark', lang: 'pl', notes: "", avatar: null };
+}
 
 window.onload = () => {
-    applyTheme(state.theme);
-    updateUI();
-    const q = LEDGER_STRINGS[state.lang].quotes;
-    document.getElementById('splash-quote').innerText = q[Math.floor(Math.random() * q.length)];
+    // 2. Wymuszenie motywu
+    document.body.setAttribute('data-theme', state.theme || 'dark');
     
-    if(state.avatar) {
-        const img = document.getElementById('avatar-img');
-        img.src = state.avatar; img.style.display = 'block';
+    // 3. Obsługa tekstów (zabezpieczenie przed brakiem lang.js)
+    if (typeof LEDGER_STRINGS !== 'undefined') {
+        const q = LEDGER_STRINGS[state.lang].quotes;
+        const quoteEl = document.getElementById('splash-quote');
+        if (quoteEl) quoteEl.innerText = q[Math.floor(Math.random() * q.length)];
     }
-    
-    document.getElementById('shadow-notes').value = state.notes;
-    document.getElementById('base-income').value = state.income || "";
-    document.getElementById('base-bills').value = state.bills || "";
-    document.getElementById('base-payday').value = state.payday || "";
 
+    // 4. Mechanizm otwierania aplikacji (Splash Exit)
     setTimeout(() => {
-        document.getElementById('splash-screen').style.opacity = '0';
+        const splash = document.getElementById('splash-screen');
+        const app = document.getElementById('app-container');
+        
+        if (splash) splash.style.opacity = '0';
         setTimeout(() => {
-            document.getElementById('splash-screen').style.display = 'none';
-            document.getElementById('app-container').style.display = 'block';
-        }, 800);
-    }, 2500);
+            if (splash) splash.style.display = 'none';
+            if (app) app.style.display = 'flex'; // Zmieniono na flex dla lepszego układu
+            updateUI(); // Odśwież cyferki
+        }, 600);
+    }, 2000);
+
+    setInterval(updateClock, 1000);
 };
 
-function save() { localStorage.setItem('ledger_coon_v2_5', JSON.stringify(state)); }
-
 function updateUI() {
-    const daily = calculateDaily();
-    const amountEl = document.getElementById('daily-amount');
-    
-    if(state.decoy) {
-        amountEl.innerText = "15.20";
-        document.getElementById('stashek-talk').innerText = "Kupisz mi te winogrona?";
-    } else {
-        amountEl.innerText = daily.toFixed(2);
-        amountEl.style.color = daily < 0 ? "var(--danger)" : "var(--accent)";
-        const survival = getSurvivalDays();
-        document.getElementById('streak-display').innerText = `⏳ Paliwa na: ${survival} dni`;
-        const dialogues = LEDGER_STRINGS[state.lang].stashek;
-        document.getElementById('stashek-talk').innerText = daily < 20 ? dialogues.bad : dialogues.good;
-    }
-    updateRank();
+    try {
+        const daily = calculateDaily();
+        const amountEl = document.getElementById('daily-amount');
+        if (amountEl) {
+            amountEl.innerText = daily.toFixed(2);
+            amountEl.style.color = daily < 0 ? "var(--danger)" : "var(--accent)";
+        }
+    } catch (e) { console.error("Błąd UI:", e); }
 }
 
 function calculateDaily() {
-    if(!state.payday) return 0;
-    const days = Math.ceil((new Date(state.payday) - new Date()) / (1000*3600*24)) || 1;
+    if (!state.payday) return 0;
+    const payDate = new Date(state.payday);
+    const today = new Date();
+    const diff = payDate - today;
+    const days = Math.ceil(diff / (1000 * 3600 * 24)) || 1;
     const spent = state.expenses.reduce((s, e) => s + e.amount, 0);
-    const subSum = state.subs ? state.subs.reduce((s, b) => s + b.amount, 0) : 0;
-    return (state.income - state.bills - subSum - spent) / days;
+    return (state.income - state.bills - spent) / days;
 }
-
-function getSurvivalDays() {
-    const daily = calculateDaily();
-    const totalLeft = (state.income - state.bills) - state.expenses.reduce((s, e) => s + e.amount, 0);
-    if(totalLeft <= 0) return 0;
-    const count = Math.min(state.expenses.length, 7);
-    const avg = state.expenses.length > 0 ? (state.expenses.slice(-7).reduce((s,e)=>s+e.amount, 0) / count) : daily;
-    return Math.floor(totalLeft / (avg || 1));
-}
-
-function updateRank() {
-    const ranks = LEDGER_STRINGS[state.lang].ranks;
-    const lvl = Math.floor(state.xp / 1000);
-    document.getElementById('rank-name').innerText = ranks[Math.min(lvl, ranks.length-1)];
-    document.getElementById('xp-text').innerText = `${state.xp % 1000} / 1000 XP`;
-    const offset = 150.8 - ((state.xp % 1000) / 1000) * 150.8;
-    document.querySelector('.progress-ring__circle').style.strokeDashoffset = offset;
-}
-
-function updateBase() {
-    state.income = parseFloat(document.getElementById('base-income').value) || 0;
-    state.bills = parseFloat(document.getElementById('base-bills').value) || 0;
-    state.payday = document.getElementById('base-payday').value;
-    save(); updateUI();
-}
-
-function confirmExpense() {
-    const v = parseFloat(document.getElementById('exp-val').value);
-    if(v > 0) {
-        state.expenses.push({amount: v, date: new Date().toISOString()});
-        state.xp += 40; playSound('coin'); 
-        closeModal(); save(); updateUI();
-        document.getElementById('exp-val').value = "";
-    }
-}
-
-function quickAdd(val) { document.getElementById('exp-val').value = val; }
-
-function exportData() {
-    const data = JSON.stringify(state);
-    const blob = new Blob([data], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'ledger_akta.json'; a.click();
-}
-
-function triggerImport() { document.getElementById('import-input').click(); }
-document.getElementById('import-input').onchange = (e) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-        state = JSON.parse(reader.result);
-        save(); location.reload();
-    };
-    reader.readAsText(e.target.files[0]);
-};
-
-function toggleSettings() { 
-    const m = document.getElementById('settings-modal');
-    m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-}
-
-function toggleStash() {
-    const s = document.getElementById('stash-layer');
-    s.style.display = s.style.display === 'flex' ? 'none' : 'flex';
-}
-
-function saveNotes() { state.notes = document.getElementById('shadow-notes').value; save(); }
-
-function applyTheme(t) { document.body.setAttribute('data-theme', t); }
-function toggleTheme() { state.theme = state.theme === 'dark' ? 'light' : 'dark'; applyTheme(state.theme); save(); }
 
 function updateClock() {
     const n = new Date();
-    document.getElementById('clock-display').innerHTML = `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
+    const clock = document.getElementById('clock-display');
+    if (clock) clock.innerText = `${n.getHours().toString().padStart(2, '0')}:${n.getMinutes().toString().padStart(2, '0')}`;
 }
 
-document.getElementById('clock-display').onclick = () => {
-    clockClicks++;
-    if(clockClicks >= 5) { state.decoy = !state.decoy; updateUI(); clockClicks = 0; }
-    setTimeout(() => clockClicks = 0, 3000);
-};
-
-function triggerAvatarUpload() { document.getElementById('avatar-input').click(); }
-document.getElementById('avatar-input').onchange = (e) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-        state.avatar = reader.result;
-        const img = document.getElementById('avatar-img');
-        img.src = reader.result; img.style.display = 'block';
-        save();
-    };
-    reader.readAsDataURL(e.target.files[0]);
-};
-
-// Logika Minigry (Skrócona)
-function openMiniGame() { document.getElementById('game-container').style.display='flex'; initGame(); }
-function closeMiniGame() { document.getElementById('game-container').style.display='none'; clearInterval(gameInterval); }
-function initGame() {
-    const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth - 40; canvas.height = window.innerHeight * 0.6;
-    let x = canvas.width / 2; let items = [];
-    gameInterval = setInterval(() => {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.font = "40px Arial"; ctx.fillText("🦝", x-20, canvas.height-50);
-        if(Math.random()<0.05) items.push({x:Math.random()*canvas.width, y:0, v: 10, i: "🪙"});
-        items.forEach((it, i) => {
-            it.y += 5; ctx.fillText(it.i, it.x, it.y);
-            if(it.y > canvas.height-80 && Math.abs(it.x-x)<40) { score+=it.v; state.xp+=5; items.splice(i,1); }
-        });
-        document.getElementById('game-score').innerText = `PUNKTY: ${score}`;
-    }, 30);
-    canvas.ontouchmove = (e) => x = e.touches[0].clientX - 20;
+// Funkcje pomocnicze, aby przyciski nie wywalały błędów
+function toggleSettings() { 
+    const m = document.getElementById('settings-modal');
+    if (m) m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+}
+function openExpenseModal() { 
+    const m = document.getElementById('expense-modal');
+    if (m) m.style.display = 'flex';
+}
+function closeModal() { 
+    const m = document.getElementById('expense-modal');
+    if (m) m.style.display = 'none';
 }
