@@ -2,8 +2,8 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LedgerCoon: Sovereign</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>LedgerCoon Sovereign</title>
     <link rel="stylesheet" href="style.css">
     <script src="lang.js" defer></script>
     <script src="script.js" defer></script>
@@ -11,24 +11,20 @@
 <body data-theme="dark">
 
     <div id="splash-screen">
-        <div class="splash-content">
-            <img src="img/splash.png" alt="LedgerCoon" class="splash-logo">
-            <h1 class="glitch-text">LedgerCoon</h1>
-            <div class="quote-container">
-                <p id="splash-quote">"Inicjalizacja protokołów..."</p>
-            </div>
-            <span class="handle">@kryspinowskyy</span>
-        </div>
+        <img src="img/splash.png" class="splash-logo">
+        <h1 style="color:#00d2ff">LedgerCoon</h1>
+        <p id="splash-quote" style="text-align:center; padding:20px; opacity:0.7 italic">Inicjalizacja...</p>
+        <span style="margin-top:20px; color:#00d2ff; font-weight:bold">@kryspinowskyy</span>
     </div>
 
-    <div id="app-container" style="display: none;">
+    <div id="app-container" style="display:none;">
         <header class="main-header">
             <div class="profile-section" onclick="triggerAvatarUpload()">
                 <div class="avatar-wrapper">
-                    <svg class="progress-ring" width="54" height="54">
-                        <circle class="progress-ring__circle" stroke="#00d2ff" stroke-width="3" fill="transparent" r="24" cx="27" cy="27"/>
+                    <svg class="progress-ring" width="50" height="50">
+                        <circle class="progress-ring__circle" stroke="#00d2ff" stroke-width="3" fill="transparent" r="22" cx="25" cy="25"/>
                     </svg>
-                    <div id="user-avatar" class="avatar-circle">
+                    <div class="avatar-circle">
                         <img id="avatar-img" src="" style="display:none;">
                     </div>
                 </div>
@@ -37,18 +33,18 @@
                     <small id="xp-text">0 / 1000 XP</small>
                 </div>
             </div>
-            <div id="clock-display" class="glass-clock" title="Kliknij 5x dla Decoy Mode">00:00</div>
+            <div id="clock-display" class="glass-clock">00:00</div>
         </header>
 
         <main id="dashboard">
             <div class="stashek-box">
-                <div class="speech-bubble glass">
-                    <p id="stashek-talk">"Księgi otwarte. Co tam psujemy dzisiaj?"</p>
+                <div class="speech-bubble">
+                    <p id="stashek-talk">Ładowanie protokołów...</p>
                 </div>
                 <img src="img/icon.png" id="stashek-mood">
             </div>
 
-            <div class="budget-card glass">
+            <div class="budget-card">
                 <p class="label">LIMIT DZIENNY</p>
                 <h2 id="daily-amount">0.00</h2>
                 <div class="survival-badge" id="streak-display">⏳ Paliwa na: -- dni</div>
@@ -56,74 +52,12 @@
         </main>
 
         <nav class="bottom-nav">
-            <button class="nav-icon glass" onclick="openMiniGame()">🎮</button>
+            <button class="nav-icon" onclick="openMiniGame()">🎮</button>
             <button class="add-btn" onclick="openExpenseModal()">+</button>
-            <button class="nav-icon glass" onclick="toggleSettings()">⚙️</button>
+            <button class="nav-icon" onclick="toggleSettings()">⚙️</button>
         </nav>
     </div>
 
-    <div id="settings-modal" class="modal">
-        <div class="modal-content glass">
-            <h3>PANEL OPERACYJNY</h3>
-            <button class="btn-sec" onclick="toggleTheme()">MOTYW (JASNY/CIEMNY)</button>
-            <button class="btn-sec" onclick="toggleStash()">SKARBIEC & PLANOWANIE</button>
-            <button class="btn-sec" onclick="exportData()">EKSPORTUJ AKTA (.JSON)</button>
-            <button class="btn-sec" onclick="triggerImport()">IMPORTUJ AKTA</button>
-            <button class="btn-pri" onclick="toggleSettings()">POWRÓT</button>
-        </div>
-    </div>
-
-    <div id="stash-layer" class="hidden-view">
-        <div class="stash-header">
-            <button class="back-btn" onclick="toggleStash()">←</button>
-            <h2>SKARBIEC</h2>
-        </div>
-        <div class="stash-content">
-            <div class="planning-box glass">
-                <small>ODPRAWA MIESIĘCZNA</small>
-                <input type="number" id="base-income" placeholder="Przychód netto" onchange="updateBase()">
-                <input type="number" id="base-bills" placeholder="Suma rachunków" onchange="updateBase()">
-                <input type="date" id="base-payday" onchange="updateBase()">
-            </div>
-
-            <div class="notes-area glass">
-                <small>STRATEGIA (NOTATNIK)</small>
-                <textarea id="shadow-notes" oninput="saveNotes()" placeholder="Twoje cele i plany..."></textarea>
-            </div>
-
-            <div id="subs-list" class="glass">
-                <small>PIJAWKI (SUBSKRYPCJE)</small>
-                <div id="subs-container"></div>
-                <button class="btn-sec" style="font-size: 0.7rem;" onclick="addSubscription()">+ DODAJ SUBSKRYPCJĘ</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="expense-modal" class="modal">
-        <div class="modal-content glass">
-            <div class="quick-amounts">
-                <button onclick="quickAdd(10)">+10</button>
-                <button onclick="quickAdd(20)">+20</button>
-                <button onclick="quickAdd(50)">+50</button>
-            </div>
-            <input type="number" id="exp-val" placeholder="0.00" inputmode="decimal">
-            <input type="text" id="exp-title" placeholder="Na co poszło?">
-            <div class="modal-actions">
-                <button onclick="closeModal()" class="btn-sec">ANULUJ</button>
-                <button onclick="confirmExpense()" class="btn-pri">ZATWIERDŹ</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="game-container" class="hidden-view">
-        <div class="game-header">
-            <div id="game-score">PUNKTY: 0</div>
-            <button onclick="closeMiniGame()" class="btn-sec">WYJDŹ</button>
-        </div>
-        <canvas id="gameCanvas"></canvas>
-    </div>
-
     <input type="file" id="avatar-input" style="display:none" accept="image/*">
-    <input type="file" id="import-input" style="display:none" accept=".json">
 </body>
 </html>
