@@ -13,13 +13,13 @@
     <div id="splash-screen">
         <img src="img/splash.png" class="splash-logo">
         <h1 class="glitch-text">LedgerCoon</h1>
-        <p id="splash-quote" style="padding: 20px; text-align: center; opacity: 0.7; font-style: italic; font-size: 0.9rem;">Protokoły ładowane...</p>
+        <p id="splash-quote" style="padding: 20px; text-align: center; opacity: 0.7; font-style: italic; font-size: 0.9rem;">Ładowanie...</p>
         <span style="color:var(--accent); font-weight:bold; letter-spacing: 1px; font-size: 0.8rem; margin-top: 20px;">@kryspinowskyy</span>
     </div>
 
     <div id="app-container" style="display:none;">
         <header class="main-header">
-            <div class="profile-section" onclick="triggerAvatarUpload()">
+            <div class="profile-section" onclick="openModal('rank-modal')">
                 <div class="avatar-wrapper">
                     <svg class="progress-ring" width="50" height="50">
                         <circle class="progress-ring__circle" stroke="#00d2ff" stroke-width="3" fill="transparent" r="22" cx="25" cy="25"/>
@@ -41,58 +41,85 @@
             </div>
 
             <div class="budget-card">
-                <p style="font-size:0.7rem; opacity:0.6; letter-spacing:1.5px;">LIMIT DZIENNY</p>
+                <p id="ui-daily" style="font-size:0.7rem; opacity:0.6; letter-spacing:1.5px; font-weight:bold;">LIMIT DZIENNY</p>
                 <h2 id="daily-amount">0.00</h2>
                 <div id="streak-display">⏳ Paliwa na: -- dni</div>
             </div>
 
-            <div class="shadow-log" id="recent-expenses-log">
-                </div>
+            <div class="shadow-log" id="recent-expenses-log"></div>
         </main>
 
         <nav class="bottom-nav">
             <button class="nav-icon" onclick="openMiniGame()">🎮</button>
-            <button class="add-btn" onclick="openExpenseModal()">+</button>
-            <button class="nav-icon" onclick="toggleStash()">⚙️</button>
+            <button class="add-btn" onclick="openModal('expense-modal')">+</button>
+            <button class="nav-icon" onclick="openModal('settings-modal')">⚙️</button>
         </nav>
     </div>
 
     <div id="expense-modal" class="modal" style="justify-content: center;">
         <div class="modal-content">
             <h3 style="color:var(--accent); margin-bottom:15px; text-align:center;">DODAJ WYDATEK</h3>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <button onclick="document.getElementById('exp-val').value='10'" class="btn-sec" style="margin:0;">+10</button>
-                <button onclick="document.getElementById('exp-val').value='20'" class="btn-sec" style="margin:0;">+20</button>
-                <button onclick="document.getElementById('exp-val').value='50'" class="btn-sec" style="margin:0;">+50</button>
+            <div class="tags-row" id="expense-tags">
+                <button class="tag-btn active" onclick="selectTag(this, '🛒')">🛒</button>
+                <button class="tag-btn" onclick="selectTag(this, '🍔')">🍔</button>
+                <button class="tag-btn" onclick="selectTag(this, '🚗')">🚗</button>
+                <button class="tag-btn" onclick="selectTag(this, '🎮')">🎮</button>
+                <button class="tag-btn" onclick="selectTag(this, '❓')">❓</button>
             </div>
-            <input type="number" id="exp-val" placeholder="0.00 PLN" inputmode="decimal">
-            <input type="text" id="exp-title" placeholder="Tytuł (np. Kawa)">
+            <input type="number" id="exp-val" placeholder="0.00" inputmode="decimal">
+            <input type="text" id="exp-title" placeholder="Tytuł (Opcjonalnie)">
             <button onclick="confirmExpense()" class="btn-pri">ZATWIERDŹ</button>
             <button onclick="closeModal('expense-modal')" class="btn-sec">ANULUJ</button>
         </div>
     </div>
 
+    <div id="settings-modal" class="modal" style="justify-content: center;">
+        <div class="modal-content">
+            <h3 id="ui-settings" style="color:var(--accent); margin-bottom:15px; text-align:center;">PANEL DOWODZENIA</h3>
+            <button onclick="toggleStash()" class="btn-pri" style="margin-bottom: 15px;">WEJDŹ DO SKARBCA</button>
+            <button onclick="toggleTheme()" class="btn-sec">MIEJSCE OPERACJI (JASNY/CIEMNY)</button>
+            <button onclick="toggleLang()" class="btn-sec">JĘZYK (PL/EN)</button>
+            <button onclick="exportData()" class="btn-sec">POBIERZ AKTA (.JSON)</button>
+            <button onclick="triggerAvatarUpload()" class="btn-sec">ZDJĘCIE AGENTA</button>
+            <button onclick="closeModal('settings-modal')" class="btn-sec" style="border:none; margin-top:20px;">X ZAMKNIJ</button>
+        </div>
+    </div>
+
+    <div id="rank-modal" class="modal" style="justify-content: center;">
+        <div class="modal-content">
+            <h3 style="color:var(--accent); margin-bottom:15px; text-align:center;">DRZEWO SUWERENNOŚCI</h3>
+            <div id="ranks-container"></div>
+            <button onclick="closeModal('rank-modal')" class="btn-sec" style="margin-top:20px;">ZAMKNIJ</button>
+        </div>
+    </div>
+
     <div id="stash-layer" class="hidden-view">
-        <button onclick="toggleStash()" style="background:none; border:none; color:var(--accent); font-size:1.5rem; text-align:left; margin-bottom:20px;">← POWRÓT</button>
+        <button onclick="toggleStash()" style="background:none; border:none; color:var(--accent); font-size:1.5rem; text-align:left; margin-bottom:20px; cursor:pointer;">← POWRÓT</button>
+        <h2 id="ui-stash" style="margin-bottom: 20px;">SKARBIEC</h2>
         
-        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
+        <div class="stash-panel">
             <small style="color:var(--accent); font-weight:bold;">BAZA OPERACYJNA</small>
-            <input type="number" id="base-income" placeholder="Wypłata netto (PLN)" onchange="updateBase()" style="margin-top:10px;">
-            <input type="number" id="base-bills" placeholder="Stałe rachunki (PLN)" onchange="updateBase()">
+            <input type="number" id="base-income" placeholder="Wypłata netto" onchange="updateBase()" style="margin-top:10px;">
+            <input type="number" id="base-bills" placeholder="Stałe rachunki" onchange="updateBase()">
             <input type="date" id="base-payday" onchange="updateBase()">
+            <small style="color:var(--danger); font-weight:bold; margin-top:10px; display:block;">ŻELAZNA REZERWA (ZAMROŻONE)</small>
+            <input type="number" id="base-reserve" placeholder="Kwota do zablokowania" onchange="updateBase()">
         </div>
 
-        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; border:1px solid rgba(255,255,255,0.05); margin-bottom:20px;">
+        <div class="stash-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <small style="color:var(--accent); font-weight:bold;">CELE OPERACYJNE</small>
+                <button onclick="addGoal()" style="background:var(--accent); color:#000; border:none; border-radius:8px; padding:5px 10px; font-weight:bold; font-size:0.7rem;">+ CEL</button>
+            </div>
+            <div id="goals-container"></div>
+        </div>
+
+        <div class="stash-panel">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <small style="color:var(--accent); font-weight:bold;">PIJAWKI</small>
-                <button onclick="openSubModal()" style="background:var(--accent); color:#000; border:none; border-radius:8px; padding:5px 10px; font-weight:bold; font-size:0.7rem;">+ DODAJ</button>
+                <button onclick="openModal('sub-modal')" style="background:var(--accent); color:#000; border:none; border-radius:8px; padding:5px 10px; font-weight:bold; font-size:0.7rem;">+ PIJAWKA</button>
             </div>
             <div id="subs-container"></div>
-        </div>
-
-        <div style="background:rgba(0,0,0,0.3); padding:20px; border-radius:20px; border:1px solid rgba(255,255,255,0.05);">
-            <small style="color:var(--accent); font-weight:bold; display:block; margin-bottom:10px;">TAJNE ZAPISKI</small>
-            <textarea id="shadow-notes" oninput="saveNotes()" placeholder="Strategia, cele..."></textarea>
         </div>
     </div>
 
@@ -100,10 +127,10 @@
         <div class="modal-content">
             <h3 style="color:var(--accent); margin-bottom:15px; text-align:center;">WYBIERZ PIJAWKĘ</h3>
             <div class="subs-grid">
-                <button class="sub-preset" onclick="addPresetSub('Netflix', 43)">🔴 Netflix<br><small>43 PLN</small></button>
-                <button class="sub-preset" onclick="addPresetSub('Spotify', 20)">🟢 Spotify<br><small>20 PLN</small></button>
-                <button class="sub-preset" onclick="addPresetSub('YouTube', 26)">▶️ YouTube<br><small>26 PLN</small></button>
-                <button class="sub-preset" onclick="addPresetSub('Siłownia', 100)">💪 Siłownia<br><small>100 PLN</small></button>
+                <button class="sub-preset" onclick="addPresetSub('Netflix', 43)">🔴 Netflix<br><small>43</small></button>
+                <button class="sub-preset" onclick="addPresetSub('Spotify', 20)">🟢 Spotify<br><small>20</small></button>
+                <button class="sub-preset" onclick="addPresetSub('YouTube', 26)">▶️ YouTube<br><small>26</small></button>
+                <button class="sub-preset" onclick="addPresetSub('Gym', 100)">💪 Siłownia<br><small>100</small></button>
             </div>
             <button onclick="addCustomSub()" class="btn-pri">WŁASNA PIJAWKA</button>
             <button onclick="closeModal('sub-modal')" class="btn-sec">ANULUJ</button>
@@ -124,4 +151,3 @@
     <script src="script.js" defer></script>
 </body>
 </html>
-UK
