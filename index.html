@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LedgerCoon: Shadow Protocol</title>
+    <title>LedgerCoon: Shadow Protocol V2</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121b26">
@@ -20,15 +20,16 @@
             <h1 class="glitch-text">LedgerCoon</h1>
             <p id="splash-quote">"Cena to to, co płacisz. Wartość to to, co otrzymujesz."</p>
             <span class="handle">Created by @kryspinowskyy</span>
-            <p style="font-size: 0.7rem; margin-top: 20px; opacity: 0.6;">Dotknij ekranu, by odblokować Stashka</p>
+            <p class="tap-hint">Dotknij, by aktywować protokół</p>
         </div>
     </div>
 
     <div id="app-container" style="display: none;">
+        
         <header class="main-header">
-            <div class="user-pill">
-                <div id="user-avatar" class="avatar-circle glass" onclick="handleAvatarClick()">
-                    <img id="avatar-img" src="" style="display:none; width:100%; height:100%; border-radius:50%; object-fit:cover;">
+            <div class="user-pill glass" onclick="openProfile()">
+                <div id="user-avatar" class="avatar-circle">
+                    <img id="avatar-img" src="img/icon.png" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
                 </div>
                 <div class="rank-info">
                     <span id="rank-name">Dust Collector</span>
@@ -44,13 +45,20 @@
                     <img src="img/icon.png" id="stashek-mood" class="breathing" alt="Stashek">
                     <div id="weather-effect">☀️</div>
                 </div>
-                <p id="stashek-talk" class="glass-text">"Gotowy na optymalizację, Szefie?"</p>
+                <div class="speech-bubble glass">
+                    <p id="stashek-talk">"Księgi otwarte. Co tam psujemy dzisiaj, Szefie?"</p>
+                </div>
             </div>
 
             <div class="budget-card glass" id="main-budget-card">
-                <p id="label-today">DOSTĘPNE DZIŚ</p>
+                <p class="label">DOSTĘPNE DZIŚ</p>
                 <h2 id="daily-amount" class="rolling-num">0.00</h2>
-                <div class="streak-badge" id="streak-display">🔥 0 dni</div>
+                <div class="streak-badge shadow-glow" id="streak-display">⏳ Paliwa na: -- dni</div>
+            </div>
+
+            <div class="quick-notes glass">
+                <small>SHADOW MEMO</small>
+                <p id="memo-preview" onclick="toggleStash()">Dotknij, by otworzyć Skarbiec i notatki...</p>
             </div>
         </main>
 
@@ -61,23 +69,15 @@
         </nav>
     </div>
 
-    <div id="game-container" class="hidden-view">
-        <canvas id="gameCanvas"></canvas>
-        <div class="game-ui">
-            <div id="game-score">PUNKTY: 0</div>
-            <button onclick="closeMiniGame()" class="btn-sec">ZAMKNIJ</button>
-        </div>
-    </div>
-
     <div id="expense-modal" class="modal">
         <div class="modal-content glass">
             <div class="ghost-forecast">
-                <div class="forecast-box glass">
+                <div class="forecast-box">
                     <small>TERAZ</small>
                     <span id="ghost-now">0.00</span>
                 </div>
                 <div class="forecast-box impact">
-                    <small>PROGNOZA DNIA</small>
+                    <small>PO ZAKUPIE</small>
                     <span id="ghost-future">0.00</span>
                 </div>
             </div>
@@ -86,32 +86,59 @@
                 <input type="text" id="exp-title" placeholder="Na co idzie kasa?">
             </div>
             <div class="modal-actions">
-                <button onclick="closeModal()" class="btn-sec">Wróć</button>
-                <button onclick="confirmExpense()" class="btn-pri">Zatwierdź</button>
+                <button onclick="closeModal()" class="btn-sec">ANULUJ</button>
+                <button onclick="confirmExpense()" class="btn-pri">ZATWIERDŹ</button>
             </div>
         </div>
     </div>
 
     <div id="stash-layer" class="hidden-view">
-        <div class="stash-content">
+        <div class="stash-header">
+            <button class="back-btn" onclick="toggleStash()">←</button>
             <h2>SKARBIEC</h2>
-            <div id="vision-box" class="vision-target glass" onclick="triggerPhotoUpload()">
+        </div>
+        
+        <div class="stash-content">
+            <div id="vision-box" class="vision-target glass" onclick="triggerVisionUpload()">
                 <img id="vision-img" src="" style="display:none; width:100%; height:100%; border-radius:20px; object-fit:cover;">
-                <p id="vision-placeholder">DODAJ CEL (WIZJA)</p>
+                <div class="vision-text">
+                    <p id="vision-placeholder">DODAJ CEL (WIZJA)</p>
+                    <div class="progress-container" id="vision-progress" style="display:none;">
+                        <div id="vision-fill"></div>
+                    </div>
+                </div>
             </div>
-            
-            <div id="shred-list-container">
-                <p style="font-size: 0.7rem; opacity: 0.5;">NAJNOWSZE WYDATKI (PRZECIĄGNIJ W DÓŁ)</p>
-                <div id="shred-list"></div>
+
+            <div class="notes-area glass">
+                <small>TAJNE ZAPISKI</small>
+                <textarea id="shadow-notes" placeholder="Tu wpisz swoje plany finansowe..." oninput="saveNotes()"></textarea>
+            </div>
+
+            <div id="subs-list" class="glass">
+                <small>PIJAWKI (SUBSKRYPCJE)</small>
+                <div id="subs-container">
+                    </div>
             </div>
 
             <div id="shredder-zone" class="glass">
                 <div class="shredder-icon">⚙️</div>
-                <p>NISZCZARKA DŁUGÓW</p>
+                <p>NISZCZARKA DŁUGÓW (PRZECIĄGNIJ TU)</p>
             </div>
+            <div id="shred-list"></div>
         </div>
     </div>
 
+    <div id="game-container" class="hidden-view">
+        <div class="game-header">
+            <div id="game-score">PUNKTY: 0</div>
+            <button onclick="closeMiniGame()" class="btn-sec">WYJDŹ</button>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <p class="game-hint">Przesuwaj palcem, by Stashek łapał kasę!</p>
+    </div>
+
     <input type="file" id="file-input" style="display:none" accept="image/*">
+    <input type="file" id="vision-input" style="display:none" accept="image/*">
+
 </body>
 </html>
