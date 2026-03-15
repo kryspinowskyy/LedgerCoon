@@ -12,9 +12,9 @@
 
     <div id="splash-screen">
         <img src="img/splash.png" class="splash-logo">
-        <h1 style="color:#00d2ff">LedgerCoon</h1>
-        <p id="splash-quote" style="text-align:center; padding:20px; opacity:0.7 italic">Inicjalizacja...</p>
-        <span style="margin-top:20px; color:#00d2ff; font-weight:bold">@kryspinowskyy</span>
+        <h1 style="color:#00d2ff; margin-bottom:10px;">LedgerCoon</h1>
+        <p id="splash-quote" style="opacity:0.6; font-style:italic; text-align:center; padding:0 20px;">Wczytywanie protokołu...</p>
+        <span style="margin-top:40px; color:#00d2ff; font-weight:bold; letter-spacing:1px;">@kryspinowskyy</span>
     </div>
 
     <div id="app-container" style="display:none;">
@@ -39,15 +39,15 @@
         <main id="dashboard">
             <div class="stashek-box">
                 <div class="speech-bubble">
-                    <p id="stashek-talk">Ładowanie protokołów...</p>
+                    <p id="stashek-talk">"Księgi otwarte. Co tam psujemy dzisiaj?"</p>
                 </div>
                 <img src="img/icon.png" id="stashek-mood">
             </div>
 
             <div class="budget-card">
-                <p class="label">LIMIT DZIENNY</p>
+                <p style="font-size:0.7rem; opacity:0.6; letter-spacing:1px;">LIMIT DZIENNY</p>
                 <h2 id="daily-amount">0.00</h2>
-                <div class="survival-badge" id="streak-display">⏳ Paliwa na: -- dni</div>
+                <div id="streak-display" style="margin-top:10px; font-weight:bold; font-size:0.8rem;">⏳ Paliwa na: -- dni</div>
             </div>
         </main>
 
@@ -56,6 +56,18 @@
             <button class="add-btn" onclick="openExpenseModal()">+</button>
             <button class="nav-icon" onclick="toggleSettings()">⚙️</button>
         </nav>
+    </div>
+
+    <div id="stash-layer" class="hidden-view">
+        <button onclick="toggleStash()" style="color:var(--accent); background:none; border:none; font-size:1.5rem; text-align:left;">← POWRÓT</button>
+        <h2 style="margin:20px 0;">SKARBIEC</h2>
+        <textarea id="shadow-notes" oninput="saveNotes()" style="width:100%; height:200px; background:rgba(0,0,0,0.2); border:1px solid var(--accent); color:white; padding:15px; border-radius:15px; font-family:inherit;" placeholder="Twoje zapiski..."></textarea>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <h3 style="color:var(--accent); margin-bottom:20px;">USTAWIENIA</h3>
+        <button onclick="toggleTheme()" style="width:100%; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid var(--accent); background:none; color:white;">ZMIEŃ MOTYW</button>
+        <button onclick="toggleSettings()" style="width:100%; padding:15px; border-radius:10px; background:var(--accent); color:black; font-weight:bold; border:none;">ZAMKNIJ</button>
     </div>
 
     <input type="file" id="avatar-input" style="display:none" accept="image/*">
